@@ -21,6 +21,11 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Debug - show structure
+        run: |
+          pwd
+          ls -R
+
       - name: Copy tfvars
         run: cp env/dev/terraform.tfvars terraform.tfvars
 
