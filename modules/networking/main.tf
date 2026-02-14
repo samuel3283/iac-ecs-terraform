@@ -1,72 +1,115 @@
-# Módulo de Networking
-module "networking" {
-  source = "./modules/networking"
+# VPC
+resource "aws_vpc" "this" {
+  cidr_block           = var.vpc_cidr
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
-  environment         = var.environment
-  vpc_cidr           = var.vpc_cidr
-  public_subnet_cidrs = var.public_subnet_cidrs
-  availability_zones  = var.availability_zones
-  container_port      = var.container_port
-
-  tags = var.additional_tags
+  tags = merge(var.tags, {
+    Name = "${var.environment}-vpc"
+  })
 }
 
-# Módulo de ECR
-module "ecr" {
-  source = "./modules/ecr"
+# Internet Gateway
+resource "aws_internet_gateway" "this" {
+  vpc_id = aws_vpc.this.id
 
-  environment       = var.environment
-  repository_name   = var.ecr_repository_name
-  max_image_count   = 10
-
-  tags = var.additional_tags
+  tags = merge(var.tags, {
+    Name = "${var.environment}-igw"
+  })
 }
 
-# Módulo de ALB
-module "alb" {
-  source = "./modules/alb"
+# Public Subnets
+resource "aws_subnet" "public" {
+  count             = length(var.public_subnet_cidrs)
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = var.public_subnet_cidrs[count.index]
+  availability_zone = var.availability_zones[count.index]
 
-  environment        = var.environment
-  name               = var.project_name
-  vpc_id             = module.networking.vpc_id
-  subnet_ids         = module.networking.public_subnet_ids
-  security_group_id  = module.networking.alb_security_group_id
-  container_port     = var.container_port
-  health_check_path  = var.health_check_path
-  certificate_arn    = var.certificate_arn
+  map_public_ip_on_launch = true
 
-  tags = var.additional_tags
+  tags = merge(var.tags, {
+    Name = "${var.environment}-public-subnet-${count.index + 1}"
+    Type = "Public"
+  })
 }
 
-# Módulo de ECS
-module "ecs" {
-  source = "./modules/ecs"
+# Public Route Table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.this.id
 
-  environment        = var.environment
-  cluster_name       = "${var.project_name}-cluster"
-  service_name       = "${var.project_name}-service"
-  container_name     = "app"
-  container_image    = "${module.ecr.repository_url}:${var.container_image_tag}"
-  container_port     = var.container_port
-  container_environment = var.container_environment_variables
-  
-  subnet_ids         = module.networking.public_subnet_ids
-  security_group_id  = module.networking.ecs_tasks_security_group_id
-  target_group_arn   = module.alb.target_group_arn
-  
-  task_cpu           = var.task_cpu
-  task_memory        = var.task_memory
-  desired_count      = var.desired_count
-  assign_public_ip   = true
-  
-  enable_auto_scaling = var.enable_auto_scaling
-  min_capacity       = var.min_capacity
-  max_capacity       = var.max_capacity
-  cpu_target_value   = var.cpu_target_value
-  memory_target_value = var.memory_target_value
-  
-  log_retention_days = var.log_retention_days
-  enable_execute_command = var.environment == "dev" ? true : false
-  
-  tags = var.additional_tags
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.this.id
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.environment}-public-rt"
+  })
+}
+
+# Route Table Associations
+resource "aws_route_table_association" "public" {
+  count          = length(aws_subnet.public)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
+}
+
+# Security Group for ECS Tasks
+resource "aws_security_group" "ecs_tasks" {
+  name        = "${var.environment}-ecs-tasks-sg"
+  description = "Security group for ECS tasks"
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    description     = "HTTP from ALB"
+    from_port       = var.container_port
+    to_port         = var.container_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.environment}-ecs-tasks-sg"
+  })
+}
+
+# Security Group for ALB
+resource "aws_security_group" "alb" {
+  name        = "${var.environment}-alb-sg"
+  description = "Security group for ALB"
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    description = "HTTP from internet"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS from internet"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.environment}-alb-sg"
+  })
 }
