@@ -3,8 +3,8 @@
 
 terraform {
   backend "s3" {
-    bucket = "your-terraform-state-bucket"
-    key    = "dev/ecs-fargate-app/terraform.tfstate"
+    bucket = "terraromf-s3-iac-ecs-retos"
+    key    = "dev/terraform-reto.tfstate"
     region = "us-east-1"
   }
 }
