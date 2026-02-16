@@ -71,8 +71,8 @@ module "ecr" {
   source = "./modules/ecr"
 
   environment     = var.environment
-  repository_name = var.ecr_repository_name
+  repository_name = var.project_name
   max_image_count = 10
 
-  tags = var.additional_tags
+  tags = var.tags
 }
