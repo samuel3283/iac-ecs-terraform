@@ -26,7 +26,7 @@ enable_tls                       = false
 # ECS
 container_name            = "app"
 container_image           = "nginx:latest" # Cambiar por tu imagen
-container_port            = 8080
+container_port            = 80
 task_cpu                  = "256"
 task_memory               = "512"
 desired_count             = 2
@@ -45,3 +45,4 @@ container_environment = [
   }
 
 ]
+
