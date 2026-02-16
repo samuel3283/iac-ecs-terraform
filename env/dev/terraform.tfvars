@@ -15,7 +15,7 @@ public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
 availability_zones  = ["us-east-1a", "us-east-1b"]
 
 # Load Balancer (NLB)
-listener_port                    = 8080
+listener_port                    = 80
 health_check_interval            = 30
 health_check_healthy_threshold   = 3
 health_check_unhealthy_threshold = 3
@@ -41,8 +41,9 @@ container_environment = [
   },
   {
     name  = "PORT"
-    value = "8080"
+    value = "80"
   }
 
 ]
+
 
