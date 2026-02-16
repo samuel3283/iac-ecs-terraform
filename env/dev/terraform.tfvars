@@ -1,50 +1,46 @@
-# AWS Configuration
-aws_region   = "us-east-1"
-environment  = "dev"
-project_name = "reto-ecs-tmp0123"
+# Variables generales
+aws_region     = "us-east-1"
+project_name   = "aws-reto"
+environment    = "dev"
+
+tags = {
+  Environment = "dev"
+  ManagedBy   = "Terraform"
+  Project     = "aws-reto"
+}
 
 # Networking
 vpc_cidr            = "10.0.0.0/16"
-availability_zones  = ["us-east-1a", "us-east-1b"]
 public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+availability_zones  = ["us-east-1a", "us-east-1b"]
 
-# ECR
-ecr_repository_name = "service-crud-api"
-container_image_tag = "latest"
+# Load Balancer (NLB)
+listener_port                   = 80
+health_check_interval           = 30
+health_check_healthy_threshold  = 3
+health_check_unhealthy_threshold = 3
+enable_deletion_protection      = false
+enable_tls                      = false
+# certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxx-xxxx-xxxx" # Descomentar si enable_tls = true
 
-# ECS Task Configuration
-task_cpu       = 256
-task_memory    = 512
-container_port = 8080
-desired_count  = 1
+# ECS
+container_name        = "app"
+container_image       = "nginx:latest"  # Cambiar por tu imagen
+container_port        = 80
+task_cpu              = "256"
+task_memory           = "512"
+desired_count         = 2
+enable_container_insights = true
+log_retention_days    = 7
 
-# Container Environment Variables
-container_environment_variables = [
+# Variables de entorno para el contenedor
+container_environment = [
   {
-    name  = "SPRING_PROFILES_ACTIVE"
+    name  = "ENVIRONMENT"
     value = "dev"
   },
   {
-    name  = "LOG_LEVEL"
-    value = "DEBUG"
+    name  = "PORT"
+    value = "80"
   }
 ]
-
-# Auto Scaling
-enable_auto_scaling = true
-min_capacity        = 1
-max_capacity        = 3
-cpu_target_value    = 70
-memory_target_value = 70
-
-# Health Check
-health_check_path = "/actuator/health"
-
-# Logging
-log_retention_days = 7
-
-# Tags
-additional_tags = {
-  CostCenter = "engineering"
-  Team       = "platform"
-}

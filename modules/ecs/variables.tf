@@ -1,35 +1,46 @@
-variable "environment" {
-  description = "Environment name"
+variable "project_name" {
+  description = "Nombre del proyecto"
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the ECS cluster"
+variable "aws_region" {
+  description = "Región de AWS"
   type        = string
 }
 
-variable "service_name" {
-  description = "Name of the ECS service"
+variable "public_subnet_ids" {
+  description = "IDs de las subredes públicas"
+  type        = list(string)
+}
+
+variable "ecs_tasks_security_group_id" {
+  description = "ID del security group para ECS tasks"
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "ARN del target group"
   type        = string
 }
 
 variable "container_name" {
-  description = "Name of the container"
+  description = "Nombre del contenedor"
   type        = string
+  default     = "app"
 }
 
 variable "container_image" {
-  description = "Container image to deploy"
+  description = "Imagen del contenedor"
   type        = string
 }
 
 variable "container_port" {
-  description = "Port the container listens on"
+  description = "Puerto del contenedor"
   type        = number
 }
 
 variable "container_environment" {
-  description = "Environment variables for the container"
+  description = "Variables de entorno para el contenedor"
   type = list(object({
     name  = string
     value = string
@@ -37,86 +48,38 @@ variable "container_environment" {
   default = []
 }
 
-variable "subnet_ids" {
-  description = "List of subnet IDs"
-  type        = list(string)
-}
-
-variable "security_group_id" {
-  description = "Security group ID"
-  type        = string
-}
-
-variable "target_group_arn" {
-  description = "ARN of the target group"
-  type        = string
-}
-
 variable "task_cpu" {
-  description = "CPU units for the task"
-  type        = number
+  description = "CPU para la tarea Fargate"
+  type        = string
+  default     = "256"
 }
 
 variable "task_memory" {
-  description = "Memory for the task"
-  type        = number
+  description = "Memoria para la tarea Fargate"
+  type        = string
+  default     = "512"
 }
 
 variable "desired_count" {
-  description = "Desired number of tasks"
+  description = "Número deseado de tareas"
   type        = number
+  default     = 2
 }
 
-variable "assign_public_ip" {
-  description = "Assign public IP to tasks"
-  type        = bool
-  default     = false
-}
-
-variable "enable_auto_scaling" {
-  description = "Enable auto scaling"
+variable "enable_container_insights" {
+  description = "Habilitar Container Insights"
   type        = bool
   default     = true
 }
 
-variable "min_capacity" {
-  description = "Minimum number of tasks"
-  type        = number
-  default     = 1
-}
-
-variable "max_capacity" {
-  description = "Maximum number of tasks"
-  type        = number
-  default     = 5
-}
-
-variable "cpu_target_value" {
-  description = "Target CPU utilization"
-  type        = number
-  default     = 70
-}
-
-variable "memory_target_value" {
-  description = "Target memory utilization"
-  type        = number
-  default     = 70
-}
-
 variable "log_retention_days" {
-  description = "Days to retain logs"
+  description = "Días de retención de logs"
   type        = number
   default     = 30
 }
 
-variable "enable_execute_command" {
-  description = "Enable execute command on ECS"
-  type        = bool
-  default     = false
-}
-
 variable "tags" {
-  description = "Tags to apply to resources"
+  description = "Tags para los recursos"
   type        = map(string)
   default     = {}
 }

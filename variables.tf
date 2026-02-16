@@ -1,76 +1,109 @@
-# AWS Configuration
+# Variables generales
 variable "aws_region" {
-  description = "AWS region"
+  description = "Región de AWS"
   type        = string
   default     = "us-east-1"
 }
 
-variable "environment" {
-  description = "Environment name (dev, staging, prod)"
-  type        = string
-}
-
 variable "project_name" {
-  description = "Project name"
+  description = "Nombre del proyecto"
   type        = string
-  default     = "ecs-fargate-app"
 }
 
-# Networking
+variable "environment" {
+  description = "Ambiente (dev, staging, prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "tags" {
+  description = "Tags para todos los recursos"
+  type        = map(string)
+  default     = {}
+}
+
+# Variables de Networking
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "CIDR block para la VPC"
   type        = string
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
+  default     = "10.0.0.0/16"
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
+  description = "Lista de CIDR blocks para subredes públicas"
   type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
-# ECR
-variable "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  type        = string
+variable "availability_zones" {
+  description = "Lista de availability zones"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
-variable "container_image_tag" {
-  description = "Container image tag"
-  type        = string
-  default     = "latest"
-}
-
-# ECS Task
-variable "task_cpu" {
-  description = "CPU units for the task"
+# Variables de Load Balancer (NLB)
+variable "listener_port" {
+  description = "Puerto del listener TCP"
   type        = number
-  default     = 512
+  default     = 80
 }
 
-variable "task_memory" {
-  description = "Memory for the task"
+variable "health_check_interval" {
+  description = "Intervalo de health check en segundos"
   type        = number
-  default     = 1024
+  default     = 30
+}
+
+variable "health_check_healthy_threshold" {
+  description = "Umbral saludable"
+  type        = number
+  default     = 3
+}
+
+variable "health_check_unhealthy_threshold" {
+  description = "Umbral no saludable"
+  type        = number
+  default     = 3
+}
+
+variable "enable_deletion_protection" {
+  description = "Habilitar protección contra eliminación del NLB"
+  type        = bool
+  default     = false
+}
+
+variable "enable_tls" {
+  description = "Habilitar listener TLS en puerto 443"
+  type        = bool
+  default     = false
+}
+
+variable "certificate_arn" {
+  description = "ARN del certificado ACM para TLS"
+  type        = string
+  default     = null
+}
+
+# Variables de ECS
+variable "container_name" {
+  description = "Nombre del contenedor"
+  type        = string
+  default     = "app"
+}
+
+variable "container_image" {
+  description = "Imagen del contenedor"
+  type        = string
 }
 
 variable "container_port" {
-  description = "Port exposed by the container"
+  description = "Puerto del contenedor"
   type        = number
   default     = 8080
 }
 
-variable "desired_count" {
-  description = "Desired number of tasks"
-  type        = number
-  default     = 2
-}
-
-variable "container_environment_variables" {
-  description = "Environment variables for the container"
+variable "container_environment" {
+  description = "Variables de entorno para el contenedor"
   type = list(object({
     name  = string
     value = string
@@ -78,60 +111,32 @@ variable "container_environment_variables" {
   default = []
 }
 
-# Auto Scaling
-variable "enable_auto_scaling" {
-  description = "Enable auto scaling"
-  type        = bool
-  default     = true
+variable "task_cpu" {
+  description = "CPU para la tarea Fargate"
+  type        = string
+  default     = "256"
 }
 
-variable "min_capacity" {
-  description = "Minimum number of tasks"
+variable "task_memory" {
+  description = "Memoria para la tarea Fargate"
+  type        = string
+  default     = "512"
+}
+
+variable "desired_count" {
+  description = "Número deseado de tareas"
   type        = number
   default     = 2
 }
 
-variable "max_capacity" {
-  description = "Maximum number of tasks"
-  type        = number
-  default     = 10
+variable "enable_container_insights" {
+  description = "Habilitar Container Insights"
+  type        = bool
+  default     = true
 }
 
-variable "cpu_target_value" {
-  description = "Target CPU utilization for auto scaling"
-  type        = number
-  default     = 70
-}
-
-variable "memory_target_value" {
-  description = "Target memory utilization for auto scaling"
-  type        = number
-  default     = 70
-}
-
-# ALB
-variable "health_check_path" {
-  description = "Path for health checks"
-  type        = string
-  default     = "/actuator/health"
-}
-
-variable "certificate_arn" {
-  description = "ARN of SSL certificate for HTTPS"
-  type        = string
-  default     = null
-}
-
-# Logging
 variable "log_retention_days" {
-  description = "Days to retain logs"
+  description = "Días de retención de logs"
   type        = number
   default     = 30
-}
-
-# Tags
-variable "additional_tags" {
-  description = "Additional tags to apply to resources"
-  type        = map(string)
-  default     = {}
 }

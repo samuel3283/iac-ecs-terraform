@@ -6,10 +6,6 @@ output "public_subnet_ids" {
   value = aws_subnet.public[*].id
 }
 
-output "ecs_tasks_security_group_id" {
-  value = aws_security_group.ecs_tasks.id
-}
-
-output "alb_security_group_id" {
-  value = aws_security_group.alb.id
+output "public_subnet_cidrs" {
+  value = aws_subnet.public[*].cidr_block
 }
