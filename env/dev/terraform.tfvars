@@ -15,7 +15,7 @@ public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
 availability_zones  = ["us-east-1a", "us-east-1b"]
 
 # Load Balancer (NLB)
-listener_port                    = 80
+listener_port                    = 8080
 health_check_interval            = 30
 health_check_healthy_threshold   = 3
 health_check_unhealthy_threshold = 3
@@ -26,7 +26,7 @@ enable_tls                       = false
 # ECS
 container_name            = "app"
 container_image           = "nginx:latest" # Cambiar por tu imagen
-container_port            = 80
+container_port            = 8080
 task_cpu                  = "256"
 task_memory               = "512"
 desired_count             = 2
@@ -41,6 +41,7 @@ container_environment = [
   },
   {
     name  = "PORT"
-    value = "80"
+    value = "8080"
   }
+
 ]
