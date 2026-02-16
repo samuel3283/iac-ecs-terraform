@@ -4,7 +4,7 @@
 terraform {
   backend "s3" {
     bucket = "terraromf-s3-iac-ecs-retos"
-    key    = "dev/terraform-reto.tfstate"
+    key    = "dev/aws-terraform-reto.tfstate"
     region = "us-east-1"
   }
 }
