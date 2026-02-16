@@ -23,10 +23,10 @@ output "ecs_cluster_id" {
   value       = module.ecs.cluster_id
 }
 
-output "ecs_service_name" {
-  description = "Nombre del servicio ECS"
-  value       = module.ecs.service_name
-}
+#output "ecs_service_name" {
+#  description = "Nombre del servicio ECS"
+#  value       = module.ecs.service_name
+#}
 
 output "application_endpoint" {
   description = "Endpoint de la aplicación (usar con el puerto correcto)"
